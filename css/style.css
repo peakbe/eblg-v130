@@ -212,24 +212,41 @@ body {
 }
 
 
-/* ======================================================
-   STATUS PANEL
-====================================================== */
+/* ============================
+   PROXY STATUS PANEL PRO+
+   ============================ */
 
 .status-panel {
+    padding: 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.08);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.status-item {
+    margin-bottom: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .status-ok {
-    color: #4caf50;
+    background: rgba(0, 200, 0, 0.25);
+    color: #9f9;
 }
 
-.status-fail {
-    color: #f44336;
+.status-warn {
+    background: rgba(255, 165, 0, 0.25);
+    color: #ffb;
 }
 
+.status-error {
+    background: rgba(255, 0, 0, 0.25);
+    color: #f99;
+}
 
 /* ======================================================
    DEBUG PANEL
