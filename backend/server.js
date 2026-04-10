@@ -5,23 +5,38 @@ import fetch from "node-fetch";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: "*" }));
+// =========================
+// CORS PRO+
+// =========================
+app.use(cors({
+    origin: "*",
+    methods: ["GET"],
+    allowedHeaders: ["Content-Type"]
+}));
 
+// =========================
+// FETCH PRO+
+// =========================
 async function safeFetch(url) {
     try {
-        console.log("[FETCH] URL:", url);
+        console.log("[FETCH] →", url);
 
         const res = await fetch(url);
+        console.log("[FETCH] STATUS:", res.status);
 
-        console.log("[FETCH] HTTP STATUS:", res.status);
+        const text = await res.text();
 
         if (!res.ok) {
-            const text = await res.text();
-            console.error("[FETCH ERROR] Body:", text);
+            console.error("[FETCH ERROR]", text);
             return { fallback: true, status: res.status, body: text };
         }
 
-        return await res.json();
+        try {
+            return JSON.parse(text);
+        } catch (err) {
+            console.error("[FETCH PARSE ERROR]", err);
+            return { fallback: true, error: "Invalid JSON", raw: text };
+        }
 
     } catch (err) {
         console.error("[FETCH EXCEPTION]", err);
@@ -29,25 +44,54 @@ async function safeFetch(url) {
     }
 }
 
-
-
+// =========================
+// METAR
+// =========================
 app.get("/metar", async (req, res) => {
-    res.json(await safeFetch("https://api.checkwx.com/metar/EBLG/decoded?x-api-key=YOUR_KEY"));
+    const data = await safeFetch(
+        "https://api.checkwx.com/metar/EBLG/decoded?x-api-key=YOUR_KEY"
+    );
+
+    if (data.fallback) {
+        return res.json({
+            fallback: true,
+            metar: "Unavailable",
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    res.json(data);
 });
 
+// =========================
+// TAF
+// =========================
 app.get("/taf", async (req, res) => {
-    res.json(await safeFetch("https://api.checkwx.com/taf/EBLG/decoded?x-api-key=YOUR_KEY"));
+    const data = await safeFetch(
+        "https://api.checkwx.com/taf/EBLG/decoded?x-api-key=YOUR_KEY"
+    );
+
+    if (data.fallback) {
+        return res.json({
+            fallback: true,
+            taf: "Unavailable",
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    res.json(data);
 });
 
+// =========================
+// FIDS (OpenSky)
+// =========================
 app.get("/fids", async (req, res) => {
     const now = Math.floor(Date.now() / 1000);
     const begin = now - 3600;
 
     const url = `https://opensky-network.org/api/flights/departure?airport=EBLG&begin=${begin}&end=${now}`;
-
     const data = await safeFetch(url);
 
-    // Si OpenSky renvoie une erreur → fallback propre
     if (data.fallback) {
         return res.json([{
             flight: "N/A",
@@ -59,16 +103,19 @@ app.get("/fids", async (req, res) => {
         }]);
     }
 
-    // Sinon → données réelles
     res.json(data);
 });
 
-
-
+// =========================
+// SONOMETERS (placeholder)
+// =========================
 app.get("/sonos", (req, res) => {
     res.json({ ok: true });
 });
 
+// =========================
+// START SERVER
+// =========================
 app.listen(PORT, () => {
     console.log("[PROXY] Running on port", PORT);
 });
