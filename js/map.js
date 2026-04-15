@@ -4,8 +4,6 @@
 
 import { initSonometers } from "./sonometers.js";
 import { createStaticHeatmap } from "./sonometers.js";
-window.runwayLayer = L.layerGroup().addTo(map);
-window.corridorLayer = L.layerGroup().addTo(map);
 
 let map = null;
 
@@ -34,9 +32,13 @@ export function initMap() {
             attribution: "© OpenStreetMap"
         }).addTo(map);
 
+        // Layers piste active
+        window.runwayLayer = L.layerGroup().addTo(map);
+        window.corridorLayer = L.layerGroup().addTo(map);
+
         // Modules
         initSonometers(map);
-        createStaticHeatmap(map); // heatmap prête mais pas affichée
+        createStaticHeatmap(map);
 
         console.log("[MAP] Carte initialisée avec succès.");
         return map;
