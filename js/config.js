@@ -18,14 +18,15 @@ const log = (...a) => IS_DEV && console.log("[CONFIG]", ...a);
 // Ces URLs sont centralisées ici pour éviter les doublons
 // ======================================================
 
-export const PROXY = "https://eblg-dashboard-v84.onrender.com";
+export const API_BASE = "https://eblg-dashboard-v84.onrender.com";
 
 export const ENDPOINTS = {
-    metar: "/metar",
-    taf: "/taf",
-    fids: "/fids",
-    sonometers: "/sonos"   // ← CORRECTION CRITIQUE
+    metar: `${API_BASE}/metar`,
+    taf: `${API_BASE}/taf`,
+    fids: `${API_BASE}/fids`,
+    sonometers: `${API_BASE}/sonos`
 };
+
 
 log("Endpoints configurés :", ENDPOINTS);
 
