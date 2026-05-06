@@ -11,6 +11,7 @@ import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
 import { SONOMETERS } from "./sonometers-data.js";
+import { generateDynamicFids } from "./fallbackFids.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -172,6 +173,43 @@ function generateFlightNumber() {
 // SONOMETERS
 app.get("/sonos", (req, res) => {
     res.json(SONOMETERS);
+});
+// ======================================================
+// FIDS PRO+ — Données réelles Liege Airport + fallback
+// ======================================================
+
+import fetch from "node-fetch";
+
+// URL officielles
+const URL_ARR = "https://fids.liegeairport.com/api/flights/Arrivals";
+const URL_DEP = "https://fids.liegeairport.com/api/flights/Departures";
+
+// Fallback cargo dynamique (tu l’as déjà)
+import { generateDynamicFids } from "./fallbackFids.js";
+
+app.get("/fids", async (req, res) => {
+    try {
+        // On récupère les départs réels
+        const depRes = await fetch(URL_DEP);
+        if (!depRes.ok) throw new Error("Departures unreachable");
+
+        const depJson = await depRes.json();
+
+        // Format attendu par ton frontend
+        const flights = depJson.map(f => ({
+            flight: f.flightNumber || "N/A",
+            destination: f.destination || "N/A",
+            time: f.scheduledTime || "N/A",
+            status: f.status || "N/A",
+            fallback: false
+        }));
+
+        return res.json(flights);
+
+    } catch (err) {
+        console.log("[FIDS] ERREUR → fallback cargo");
+        return res.json(generateDynamicFids());
+    }
 });
 
 // =========================
