@@ -1,5 +1,5 @@
 // Adapter BASE_URL à ton Render
-const BASE_URL = "https://eblg-proxy.onrender.com";
+const BASE_URL = "https://eblg-dashboard-v84.onrender.com";
 
 export const ENDPOINTS = {
     metar: `${BASE_URL}/metar`,
